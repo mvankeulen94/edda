@@ -290,6 +290,15 @@ def info_by_type(f, e):
         if string.find(f["servers"][s], ".LOCKED") < 0:
             f["servers"][s] += ".LOCKED"
 
+    # balancer locking
+    elif e["type"] == "balancer_lock":
+        # make sure .BALANCER_LOCKED is not already appended
+        if string.find(f["servers"][s], ".BALANCER_LOCKED") < 0:
+            f["servers"][s] += ".BALANCER_LOCKED"
+    elif e["type"] == "balancer_unlock":
+        n = string.find(f["servers"][s], ".BALANCER_UNLOCKED")
+        f["servers"][s] = f["servers"][s][:n]
+
     #if f servers of f was a witness to e[] bring f up
     for server in f["servers"]:
         if f["servers"][server] == "DOWN" and server in e["witnesses"] and len(e["witnesses"]) < 2:

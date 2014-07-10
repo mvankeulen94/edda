@@ -65,6 +65,7 @@ def process(msg, date):
     doc["type"] = "balancer"
     doc["msg"] = msg
     doc["info"] = {}
+    doc["info"]["server"] = "self"
 
     if result == 0:
         # get replica set name and seeds
@@ -73,7 +74,6 @@ def process(msg, date):
         doc["info"]["subtype"] = "new_shard"
         doc["info"]["replSet"] = b[0]
         doc["info"]["members"] = b[4].split(',')
-        doc["info"]["server"] = "self"
     
     elif result == 1:
         doc["info"]["subtype"] = "start_balancing_round"

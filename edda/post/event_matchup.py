@@ -90,7 +90,7 @@ def next_event(servers, server_entries, db, coll_name):
 
     # these are messages that do not involve
     # corresponding messages across servers
-    loners = ["conn", "fsync", "sync", "stale", "init"]
+    loners = ["conn", "fsync", "sync", "stale", "init", "balancer"]
 
     first_server = None
     for s in servers:
@@ -140,9 +140,13 @@ def next_event(servers, server_entries, db, coll_name):
     if event["type"] == "exit":
         event["state"] = "DOWN"
 
-    # locking messages
+    # server locking messages
     if event["type"] == "fsync":
         event["type"] = first["info"]["state"]
+    
+    # balancer locking messages
+    if event["type"] == "balancer":
+        event["type"] = first["info"]["subtype"]
 
     # sync events
     if event["type"] == "sync":

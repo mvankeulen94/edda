@@ -692,6 +692,37 @@ class test_event_matchup(unittest.TestCase):
         but there are also many other events in the list
         that should remain unchanged by resolve_dissenters()"""
         pass
+    
+
+    # ------------------------
+    # test balancer lock event 
+    # ------------------------
+
+
+    def test_balancer_lock_event(self):
+        servers, entries, db = self.db_setup_n_servers(1)
+        server_nums = {"1"}
+        server_entries = {}
+        server_entries["1"] = []
+        
+        doc = {"date": datetime.now(), "type": "balancer", 
+                "origin_server": "1", "log_line": 1234,
+                "msg": "Mon Jun 23 10:48:47.706 [Balancer] distributed "
+                "lock 'balancer/jjezek-saio:30999:1403513327:1804289383' "
+                "acquired, ts : 53a7e9ef2c2dc81a4b42e7e8", "info": {}}
+        doc["info"]["subtype"] = "balancer_lock"
+        doc["info"]["lockName"] = ("balancer/jjezek-saio:30999:1403513327"
+                                  ":1804289383")
+        doc["info"]["ts"] = "53a7e9ef2c2dc81a4b42e7e8"
+        doc["info"]["server"] = "self"
+
+        server_entries["1"].append(doc)
+        event = next_event(server_nums, server_entries, db, "AdventureTime")
+        assert event
+        assert event["type"] == "balancer_lock"
+        assert event["target"] == "1"
+        assert event["log_line"] == 1234
+
 
 if __name__ == '__main__':
     unittest.main()
