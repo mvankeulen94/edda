@@ -197,6 +197,13 @@ class test_frames(unittest.TestCase):
         assert not f["servers"][str(e["target"])].endswith(".BALANCER_LOCKED")
 
 
+    def test_info_by_type_balancer_exception(self):
+        """Test method on balancer exception type event"""
+        e = self.generate_event("1", "balancer_exception", None, None, None)
+        f = info_by_type(new_frame(["1"]), e)
+        assert f
+
+
     def test_info_by_type_lock(self):
         """Test method on lock type event"""
         pass

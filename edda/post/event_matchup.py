@@ -55,6 +55,7 @@ def event_matchup(db, coll_name):
     "lock"     : a server requests to lock itself from writes
     "unlock"   : a server requests to unlock itself from writes
     "reconfig" : new config information was received
+    "error"    : an error was encountered
 
     This module assumes that normal network delay can account
     for up to 4 seconds of lag between server logs.  Beyond this
@@ -144,9 +145,15 @@ def next_event(servers, server_entries, db, coll_name):
     if event["type"] == "fsync":
         event["type"] = first["info"]["state"]
     
-    # balancer locking messages
+    # balancer messages
     if event["type"] == "balancer":
-        event["type"] = first["info"]["subtype"]
+        # balancer locking
+        if first["info"]["subtype"] == "balancer_lock" or \
+           first["info"]["subtype"] == "balancer_unlock":
+            event["type"] = first["info"]["subtype"]
+        # balancer exception
+        if first["info"]["subtype"] == "balancer_exception":
+            event["type"] = "error"
 
     # sync events
     if event["type"] == "sync":
@@ -170,8 +177,8 @@ def next_event(servers, server_entries, db, coll_name):
     else:
         label = event["target"]
 
+    event["log_line"] = first["msg"]
     event["summary"] = generate_summary(event, label)
-    event["log_line"] = first["log_line"]
 
     # handle corresponding messages
     event["witnesses"].append(first["origin_server"])
@@ -349,6 +356,11 @@ def generate_summary(event, hostname):
     # for syncing messages
     elif event["type"] == "sync":
         summary += " is syncing to " + event["sync_to"]
+    
+    # for error messages
+    elif event["type"] == "error":
+        err_msg = event["log_line"].split("] ")[1]
+        summary += " encountered an error: " +  err_msg
 
     # for any uncaught messages
     else:

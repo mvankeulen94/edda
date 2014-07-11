@@ -694,19 +694,20 @@ class test_event_matchup(unittest.TestCase):
         pass
     
 
-    # ------------------------
-    # test balancer lock event 
-    # ------------------------
+    # --------------------
+    # test balancer events
+    # --------------------
 
 
     def test_balancer_lock_event(self):
+        """Test behavior of balancer locking and unlocking events"""
         servers, entries, db = self.db_setup_n_servers(1)
         server_nums = {"1"}
         server_entries = {}
         server_entries["1"] = []
         
         doc = {"date": datetime.now(), "type": "balancer", 
-                "origin_server": "1", "log_line": 1234,
+                "origin_server": "1", 
                 "msg": "Mon Jun 23 10:48:47.706 [Balancer] distributed "
                 "lock 'balancer/jjezek-saio:30999:1403513327:1804289383' "
                 "acquired, ts : 53a7e9ef2c2dc81a4b42e7e8", "info": {}}
@@ -721,7 +722,30 @@ class test_event_matchup(unittest.TestCase):
         assert event
         assert event["type"] == "balancer_lock"
         assert event["target"] == "1"
-        assert event["log_line"] == 1234
+        assert event["log_line"] == doc["msg"]
+
+    
+    def test_balancer_exception_event(self):
+        """Test balancer exception event with one server"""
+        servers, entries, db = self.db_setup_n_servers(1)
+        server_nums = {"1"}
+        server_entries = {}
+        server_entries["1"] = []
+
+        doc = {"date": datetime.now(), "type": "balancer", 
+                "origin_server": "1", 
+                "msg": "Fri Dec 13 15:53:54 [Balancer] caught exception "
+                "while doing balance: can't move shard to its current "
+                "location!", "info": {}}
+        doc["info"]["subtype"] = "balancer_exception"
+        doc["info"]["err_msg"] = "can't move shard to its current location!"
+        doc["info"]["server"] = "self"
+
+        server_entries["1"].append(doc)
+        event = next_event(server_nums, server_entries, db, "AdventureTime")
+        assert event
+        assert event["type"] == "error"
+        assert event["summary"].endswith(doc["info"]["err_msg"])
 
 
 if __name__ == '__main__':
