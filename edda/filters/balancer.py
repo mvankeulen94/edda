@@ -79,10 +79,12 @@ def process(msg, date):
         doc["info"]["members"] = b[4].split(',')
     
     elif result == 1:
-        doc["info"]["subtype"] = "start_balancing_round"
-
+        doc["info"]["subtype"] = "balancing_round"
+        doc["info"]["status"] = "start"
+        
     elif result == 2:
-        doc["info"]["subtype"] = "end_balancing_round"
+        doc["info"]["subtype"] = "balancing_round"
+        doc["info"]["status"] = "end"
 
     elif result == 3:
         doc["info"]["subtype"] = "balancer_lock"

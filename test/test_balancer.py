@@ -61,10 +61,10 @@ class test_balancer(unittest.TestCase):
                          members, "new_shard", "", "", "")
         self.check_state("Mon Jun 23 10:48:47.706 [Balancer] *** start "
                          "balancing round", 1, date, "", [], 
-                         "start_balancing_round", "", "", "")
+                         "balancing_round", "", "", "")
         self.check_state("Mon Jun 23 10:48:47.981 [Balancer] *** end "
                          "of balancing round", 2, date, "", [], 
-                         "end_balancing_round", "", "", "")
+                         "balancing_round", "", "", "")
         self.check_state("Mon Jun 23 10:48:47.706 [Balancer] distributed "
                          "lock 'balancer/jjezek-saio:30999:1403513327:"
                          "1804289383' acquired, ts : "
@@ -98,8 +98,12 @@ class test_balancer(unittest.TestCase):
             assert doc["info"]["replSet"] == replSet
             assert set(doc["info"]["members"]) == set(members)
             assert doc["info"]["server"] == "self"
-        
-        # No additional tests for codes 1 and 2
+       
+        elif code == 1:
+            assert doc["info"]["status"] == "start"
+
+        elif code == 2:
+            assert doc["info"]["status"] == "end"
 
         elif code == 3:
             assert doc["info"]["lockName"] == lockName
