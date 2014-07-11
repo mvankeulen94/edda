@@ -296,7 +296,7 @@ def info_by_type(f, e):
         if string.find(f["servers"][s], ".BALANCER_LOCKED") < 0:
             f["servers"][s] += ".BALANCER_LOCKED"
     elif e["type"] == "balancer_unlock":
-        n = string.find(f["servers"][s], ".BALANCER_UNLOCKED")
+        n = string.find(f["servers"][s], ".BALANCER_LOCKED")
         f["servers"][s] = f["servers"][s][:n]
 
     #if f servers of f was a witness to e[] bring f up

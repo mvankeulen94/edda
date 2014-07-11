@@ -170,6 +170,32 @@ class test_frames(unittest.TestCase):
         assert "1" in f["broken_links"]["3"]
         assert "2" in f["broken_links"]["3"]
 
+    
+    def test_info_by_type_balancer_lock(self):
+        """Test method on balancer lock type event"""
+        e = self.generate_event("1", "balancer_lock", None, None, None)
+        f = info_by_type(new_frame(["1"]), e)
+        assert f
+        status = f["servers"][str(e["target"])]
+
+        # Check if .BALANCER_LOCKED gets added
+        assert status.endswith(".BALANCER_LOCKED")
+
+        # Check if .BALANCER_LOCK does not get added more than once 
+        f = info_by_type(f, e)
+        assert not status[:-len(".BALANCER_LOCKED")].endswith(".BALANCER"
+                                                              "_LOCKED")
+
+
+    def test_info_by_type_balancer_unlock(self):
+        """Test method on balancer unlock type event"""
+        e = self.generate_event("1", "balancer_lock", None, None, None)
+        f = info_by_type(new_frame(["1"]), e)
+        e = self.generate_event("1", "balancer_unlock", None, None, None)
+        f = info_by_type(f, e)
+        assert f
+        assert not f["servers"][str(e["target"])].endswith(".BALANCER_LOCKED")
+
 
     def test_info_by_type_lock(self):
         """Test method on lock type event"""
