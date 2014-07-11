@@ -40,6 +40,9 @@ class test_balancer(unittest.TestCase):
         assert criteria("Mon Jun 23 10:48:48.115 [Balancer] distributed "
                         "lock 'balancer/jjezek-saio:30999:1403513327:"
                         "1804289383' unlocked.") == 4
+        assert criteria("Fri Dec 13 15:53:54 [Balancer] caught exception "
+                        "while doing balance: can't move shard to its "
+                        "current location!") == 5
 
     def test_process(self):
         """test the process method of this module"""
@@ -55,13 +58,13 @@ class test_balancer(unittest.TestCase):
                          "new replica set monitor for replica set a "
                          "with seed of 172.19.19.161:27018,172.19.19."
                          "162:27018,172.19.19.163:27018", 0, date, "a", 
-                         members, "new_shard", "", "")
+                         members, "new_shard", "", "", "")
         self.check_state("Mon Jun 23 10:48:47.706 [Balancer] *** start "
                          "balancing round", 1, date, "", [], 
-                         "start_balancing_round", "", "")
+                         "start_balancing_round", "", "", "")
         self.check_state("Mon Jun 23 10:48:47.981 [Balancer] *** end "
                          "of balancing round", 2, date, "", [], 
-                         "end_balancing_round", "", "")
+                         "end_balancing_round", "", "", "")
         self.check_state("Mon Jun 23 10:48:47.706 [Balancer] distributed "
                          "lock 'balancer/jjezek-saio:30999:1403513327:"
                          "1804289383' acquired, ts : "
@@ -69,16 +72,21 @@ class test_balancer(unittest.TestCase):
                          "balancer_lock", 
                          "balancer/jjezek-saio:30999:1403513327:"
                          "1804289383", 
-                         "53a7e9ef2c2dc81a4b42e7e8")
+                         "53a7e9ef2c2dc81a4b42e7e8", "")
         self.check_state("Mon Jun 23 10:48:48.115 [Balancer] distributed "
                          "lock 'balancer/jjezek-saio:30999:1403513327:"
                          "1804289383' unlocked.", 4, date, "", [], 
                          "balancer_unlock",
                          "balancer/jjezek-saio:30999:1403513327:"
-                         "1804289383", "")
+                         "1804289383", "", "")
+        self.check_state("Fri Dec 13 15:53:54 [Balancer] caught exception "
+                         "while doing balance: can't move shard to its "
+                         "current location!", 5, date, "", [], 
+                         "balancer_exception", "", "", 
+                         "can't move shard to its current location!")
 
     def check_state(self, message, code, date, replSet, members, 
-                    subtype, lockName, ts):
+                    subtype, lockName, ts, err_msg):
         """helper method for test_process"""
         doc = process(message, date)
         assert doc
@@ -99,6 +107,9 @@ class test_balancer(unittest.TestCase):
  
         elif code == 4:
             assert doc["info"]["lockName"] == lockName
+
+        elif code == 5:
+            assert doc["info"]["err_msg"] == err_msg
       
 
 if __name__ == '__main__':

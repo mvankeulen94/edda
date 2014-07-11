@@ -39,6 +39,9 @@ def criteria(msg):
         elif 'unlocked' in msg:
             return 4
 
+    elif 'caught exception while doing balance' in msg:
+        return 5
+
     return -1
 
 def process(msg, date):
@@ -106,5 +109,10 @@ def process(msg, date):
         lockName = lockName.lstrip('\'').rstrip('\'')
 
         doc["info"]["lockName"] = lockName
+
+    elif result == 5:
+        a = msg.split('caught exception while doing balance: ')
+        doc["info"]["subtype"] = "balancer_exception"
+        doc["info"]["err_msg"] = a[1]
     
     return doc
