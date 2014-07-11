@@ -77,11 +77,9 @@ def process(msg, date):
     
     elif result == 1:
         doc["info"]["subtype"] = "start_balancing_round"
-        doc["info"]["status"] = "started"
 
     elif result == 2:
         doc["info"]["subtype"] = "end_balancing_round"
-        doc["info"]["status"] = "ended"
 
     elif result == 3:
         doc["info"]["subtype"] = "balancer_lock"

@@ -90,12 +90,8 @@ class test_balancer(unittest.TestCase):
             assert doc["info"]["replSet"] == replSet
             assert set(doc["info"]["members"]) == set(members)
             assert doc["info"]["server"] == "self"
-
-        elif code == 1:
-            assert doc["info"]["status"] == "started"
- 
-        elif code == 2:
-            assert doc["info"]["status"] == "ended"
+        
+        # No additional tests for codes 1 and 2
 
         elif code == 3:
             assert doc["info"]["lockName"] == lockName
